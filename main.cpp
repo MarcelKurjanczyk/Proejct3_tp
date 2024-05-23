@@ -5,6 +5,8 @@
 #include <vector>
 #include <complex>
 #include <random>
+#include <iomanip>
+#include <pybind11/numpy.h>
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
@@ -18,6 +20,15 @@ int add(int i, int j) {
 }
 
 namespace py = pybind11;
+
+void signal_show(const std::vector<double>& time, const std::vector<double>& signal, const std::string& name = "") {
+    matplot::plot(time, signal);
+    if (!name.empty()) {
+        matplot::title(name);
+    }
+    matplot::xlabel("time [s]");
+    matplot::show();
+}
 
 void add_noise(std::vector<double>& values) {
     std::random_device rd;
@@ -213,6 +224,8 @@ PYBIND11_MODULE(_core, m) {
         num_points : int
 
     )pbdoc", py::arg("frequency"), py::arg("num_points"));
+
+   m.def("signal_show", &signal_show, py::arg("time"), py::arg("signal"), py::arg("title") = "");
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
